@@ -1,0 +1,9 @@
+name: DailyRewards
+author: Mas281
+version: ${project.version}
+
+main: me.itsmas.dailyrewards.DailyRewards
+
+commands:
+  rewards:
+    aliases: [dailyreward, dailyrewards, dr]
