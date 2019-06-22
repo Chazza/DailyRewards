@@ -21,7 +21,7 @@ public class UtilTime
         {
             int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(time);
 
-            return seconds + UtilString.plural(seconds, "second", "seconds");
+            return seconds + " " + UtilString.plural(seconds, "second", "seconds");
         }
 
         String timeString = "";

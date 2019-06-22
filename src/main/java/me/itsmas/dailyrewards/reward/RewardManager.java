@@ -4,9 +4,11 @@ import me.itsmas.dailyrewards.DailyRewards;
 import me.itsmas.dailyrewards.util.Util;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +48,6 @@ public class RewardManager
         plugin.getDataStorage().save(player, data);
     }
 
-    private final String REWARDS_DIR = "rewards";
     private final List<Reward> baseRewards = new ArrayList<>();
 
     public List<Reward> getRewards(Player player)
@@ -80,45 +81,70 @@ public class RewardManager
 
     private void parseRewards()
     {
-        for (String tier : plugin.getConfig().getConfigurationSection(REWARDS_DIR + ".tiers").getKeys(false))
+        File tiersFolder = new File(plugin.getDataFolder(), "tiers");
+        assert tiersFolder.isDirectory();
+
+        for (File file : tiersFolder.listFiles())
         {
-            if (!NumberUtils.isNumber(tier))
+            String name = file.getName().split("\\.yml")[0];
+
+            if (!NumberUtils.isNumber(name))
             {
+                Util.logFatal("\"" + name + "\" is not a valid tier number");
                 continue;
             }
 
-            int tierNum = Integer.parseInt(tier);
+            int tier = Integer.parseInt(name);
 
-            if (tierNum > highestTier)
+            if (tier > highestTier)
             {
-                highestTier = tierNum;
+                highestTier = tier;
             }
 
-            for (String reward : plugin.getConfig().getConfigurationSection(REWARDS_DIR + ".tiers." + tier).getKeys(false))
+            parseTier(file, tier);
+        }
+    }
+
+    private void parseTier(File file, int tier)
+    {
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+
+        for (String section : config.getKeys(false))
+        {
+            if (!NumberUtils.isNumber(section))
             {
-                String base = REWARDS_DIR + ".tiers." + tier + "." + reward + ".";
-
-                String rawMaterial = plugin.getConfig(base + "material");
-
-                try
-                {
-                    Material material = Material.valueOf(rawMaterial);
-                    int data = plugin.getConfig(base + "data");
-
-                    String name = Util.colour(plugin.getConfig(base + "name"));
-
-                    List<String> lore = plugin.getConfig(base + "lore");
-                    lore = lore.stream().map(Util::colour).collect(Collectors.toList());
-
-                    List<String> commands = plugin.getConfig(base + "commands");
-
-                    baseRewards.add(new Reward(plugin, name, tierNum, material, data, lore, commands));
-                }
-                catch (IllegalArgumentException ex)
-                {
-                    Util.log("Invalid material " + rawMaterial);
-                }
+                Util.logFatal("\"" + section + "\" is not a valid reward number");
+                continue;
             }
+
+            parseSection(config, section, tier);
+        }
+    }
+
+    private void parseSection(YamlConfiguration config, String section, int tier)
+    {
+        String basePath = section + ".";
+
+        String rawMaterial = config.getString(basePath + "material");
+
+        try
+        {
+            Material material = Material.valueOf(rawMaterial);
+            int data = config.getInt(basePath + "data", 0);
+
+            String name = Util.colour(config.getString(basePath + "name"));
+
+            List<String> lore = config.getStringList(basePath + "lore");
+            lore = lore.stream().map(Util::colour).collect(Collectors.toList());
+
+            List<String> actions = config.getStringList(basePath + "actions");
+
+            baseRewards.add(new Reward(plugin, name, tier, material, data, lore, actions));
+        }
+        catch (IllegalArgumentException ex)
+        {
+            Util.logFatal("Unable to parse reward " + section + " in tier " + tier);
+            ex.printStackTrace();
         }
     }
 }

@@ -1,10 +1,10 @@
 package me.itsmas.dailyrewards.reward;
 
+import io.samdev.actionutil.ActionUtil;
 import me.itsmas.dailyrewards.DailyRewards;
 import me.itsmas.dailyrewards.message.Message;
 import me.itsmas.dailyrewards.util.CustomItem;
 import me.itsmas.dailyrewards.util.Util;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -17,17 +17,17 @@ public class Reward
 
     private final String name;
     private final int tier;
-    private final List<String> commands;
+    private final List<String> actions;
 
     private final CustomItem stack;
 
-    public Reward(DailyRewards plugin, String name, int tier, Material material, int data, List<String> lore, List<String> commands)
+    Reward(DailyRewards plugin, String name, int tier, Material material, int data, List<String> lore, List<String> actions)
     {
         this.plugin = plugin;
 
         this.name = name;
         this.tier = tier;
-        this.commands = commands;
+        this.actions = actions;
 
         this.stack =
                 new CustomItem(material)
@@ -41,7 +41,7 @@ public class Reward
         return name;
     }
 
-    public int getTier()
+    int getTier()
     {
         return tier;
     }
@@ -54,8 +54,7 @@ public class Reward
     public void apply(Player player)
     {
         player.sendMessage(Message.CLAIMED_REWARD.value().replace("%reward%", getName()));
-
-        commands.forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("%player%", player.getName())));
+        ActionUtil.executeActions(player, actions);
 
         plugin.getRewardManager().getData(player).update();
     }

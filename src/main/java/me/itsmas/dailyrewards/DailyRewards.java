@@ -52,10 +52,15 @@ public class DailyRewards extends JavaPlugin
         dataStorage.close();
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T getConfig(String path)
     {
-        return (T) getConfig().get(path);
+        return getConfig(path, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getConfig(String path, Object def)
+    {
+        return (T) getConfig().get(path, def);
     }
 
     public DataStorage<RewardData> getDataStorage()

@@ -31,12 +31,17 @@ public class YamlDataStorage implements DataStorage<RewardData>
 
         try
         {
-            if (!dataFile.exists())
+            if (dataFile.createNewFile())
             {
-                if (dataFile.createNewFile())
-                {
-                    Util.log("Created data.yml file");
-                }
+                Util.log("Generated data.yml file");
+            }
+
+            if (new File(plugin.getDataFolder(), "tiers").mkdir())
+            {
+                plugin.saveResource("tiers" + File.separator + "1.yml", false);
+                plugin.saveResource("tiers" + File.separator + "2.yml", false);
+
+                Util.log("Generated tiers folder and sample tiers");
             }
 
             config = YamlConfiguration.loadConfiguration(dataFile);
@@ -53,7 +58,6 @@ public class YamlDataStorage implements DataStorage<RewardData>
         Bukkit.getOnlinePlayers().forEach(player ->
         {
             RewardData data = plugin.getRewardManager().getData(player);
-
             save(player, data);
         });
 
