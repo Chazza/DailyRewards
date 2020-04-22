@@ -54,7 +54,7 @@ public class Reward
     public void apply(Player player)
     {
         player.sendMessage(Message.CLAIMED_REWARD.value().replace("%reward%", getName()));
-        ActionUtil.executeActions(player, actions);
+        plugin.getActionUtil().executeActions(player, actions);
 
         plugin.getRewardManager().getData(player).update();
     }

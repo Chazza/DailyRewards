@@ -1,5 +1,6 @@
 package me.itsmas.dailyrewards;
 
+import io.samdev.actionutil.ActionUtil;
 import me.itsmas.dailyrewards.data.DataStorage;
 import me.itsmas.dailyrewards.data.YamlDataStorage;
 import me.itsmas.dailyrewards.gui.MenuManager;
@@ -11,9 +12,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class DailyRewards extends JavaPlugin
 {
     private DataStorage<RewardData> dataStorage;
+    private ActionUtil actionUtil;
     private RewardManager rewardManager;
     private MenuManager menuManager;
-
+    
     private long cooldownMillis;
 
     public long getCooldownMillis()
@@ -41,6 +43,8 @@ public class DailyRewards extends JavaPlugin
         dataStorage = new YamlDataStorage(this);
         getDataStorage().init();
 
+        actionUtil = ActionUtil.init(this);
+        
         rewardManager = new RewardManager(this);
 
         menuManager = new MenuManager(this);
@@ -76,5 +80,9 @@ public class DailyRewards extends JavaPlugin
     public MenuManager getMenuManager()
     {
         return menuManager;
+    }
+
+    public ActionUtil getActionUtil() {
+        return actionUtil;
     }
 }

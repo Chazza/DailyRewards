@@ -2,9 +2,8 @@ name: DailyRewards
 author: Mas281
 version: ${project.version}
 
-depend: [ActionUtil]
 main: me.itsmas.dailyrewards.DailyRewards
-api-version: 1.14
+api-version: 1.15
 
 commands:
   rewards:
